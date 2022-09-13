@@ -20,7 +20,7 @@ const User =  require("./model/User");
 const cors = require("cors"); 
 
 app.use(cors({
-    origin: "http://localhost:3000"
+    origin: "*"
 }));
 
 app.use(bodyParser.json()); 
@@ -37,5 +37,6 @@ app.get('/', (req, res) => {
 });
 
 app.listen(process.env.PORT || 5000, () => {
-    logger.info(timestamp + " app is running now at Port: " + process.env.PORT);
+    console.log(`Server is running on port ${process.env.PORT}.`);
+    // logger.info(timestamp + " app is running now at Port: " + process.env.PORT);
 });
