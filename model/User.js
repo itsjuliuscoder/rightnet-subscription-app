@@ -14,7 +14,7 @@ const User = sequelize.define('users', {
     email: Sequelize.STRING,
     phone_number: Sequelize.STRING,
     dob: Sequelize.STRING,
-    // acctype: Sequelize.STRING,
+    acctype: Sequelize.STRING,
     password: Sequelize.STRING,
     referral: Sequelize.INTEGER,
     isVerified: Sequelize.BOOLEAN,
