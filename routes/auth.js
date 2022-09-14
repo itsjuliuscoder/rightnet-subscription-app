@@ -40,6 +40,9 @@ router.post(
         body('referral_code')
             .trim()
             .isLength({ min: 7, max: 30 }),
+        body('acctype')
+            .trim()
+            .isLength({ min: 7, max: 20 }),
         
     ],
     UserController.registerUser);

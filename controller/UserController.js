@@ -90,6 +90,7 @@ exports.registerUser = (req, res) => {
     const dob = req.body.dob;
     const email = req.body.email ? req.body.email : "";
     const referral = req.body.referral_code;
+    const acctype = req.body.acctype;
     const password = req.body.password;
     const hashedPassword = password;
 
@@ -97,7 +98,7 @@ exports.registerUser = (req, res) => {
         where: { 
             [Op.or]: [{phone_number: phone_number}, {email: email}]
         },    
-        defaults: { firstname: firstname, lastname: lastname, email: email, dob: dob, referral: referral, password: hashedPassword, phone_number: phone_number, isActive: 1}
+        defaults: { firstname: firstname, lastname: lastname, email: email, dob: dob, referral: referral, password: hashedPassword, phone_number: phone_number, isActive: 1, acctype: acctype}
         }).then(([result, created]) => {
             if((result != null) && (created == false) ){
                 res.status(302).json({
