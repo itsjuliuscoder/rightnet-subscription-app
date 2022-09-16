@@ -33,13 +33,10 @@ router.post(
             .isLength({ min: 3, max: 20 }),
         body('lastname')
             .trim()
-            .isLength({ min: 7, max: 30 }),
+            .isLength({ min: 3, max: 30 }),
         body('dob')
             .trim()
             .isLength({ min: 7, max: 20 }),
-        body('referral_code')
-            .trim()
-            .isLength({ min: 7, max: 30 }),
         body('acctype')
             .trim()
             .isLength({ min: 7, max: 20 }),
