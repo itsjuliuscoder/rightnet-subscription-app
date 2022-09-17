@@ -54,6 +54,7 @@ exports.loginUser = (req, res) => {
                 phone_number: result.dataValues.phone_number,
                 dob: result.dataValues.dob,
                 referral: result.dataValues.referral,
+                acctype: result.dataValues.acctype,
                 _id: result.dataValues.id
             };
 
