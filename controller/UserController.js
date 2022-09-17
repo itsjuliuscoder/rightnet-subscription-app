@@ -216,7 +216,7 @@ exports.getUserDetails = (req, res) => {
 
     User.findOne({ 
         where: { 
-            [Op.and]: [{phone_number: phone_number}, {user_id: user_id}]
+            [Op.and]: [{phone_number: phone_number}, {id: user_id}]
         }
         }).then((result) => {
             if((result === null)){

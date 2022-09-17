@@ -25,10 +25,10 @@ router.post(
     [
         body('user_id')
             .trim()
-            .isLength({ min: 7, max: 20 }),
+            .isLength({ min: 7, max: 50 }),
         body('phone_number')
             .trim()
-            .isLength({ min: 7, max: 30 }),
+            .isLength({ min: 7, max: 11 }),
     ],
     UserController.getUserDetails);
 
