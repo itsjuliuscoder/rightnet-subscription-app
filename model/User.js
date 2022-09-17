@@ -20,6 +20,7 @@ const User = sequelize.define('users', {
     referral_code: Sequelize.STRING,
     isVerified: Sequelize.BOOLEAN,
     isActive: Sequelize.BOOLEAN,
+    isPin: Sequelize.BOOLEAN,
 });
 
 module.exports = User;

@@ -17,6 +17,7 @@ const moment = require('moment');
 const authRoutesHandler = require("./routes/auth");
 let timestamp = moment().format('YYYY-MM-DD HH:mm:ss');
 const User =  require("./model/User");
+const Pin = require("./model/Pin");
 const cors = require("cors"); 
 
 app.use(cors({
@@ -28,6 +29,7 @@ app.use(bodyParser.json());
 app.use('/v1/auth', authRoutesHandler);
 
 // User.sync({ force: true });
+//Pin.sync({ force: true });
 
 app.get('/', (req, res) => {
     res.send({
