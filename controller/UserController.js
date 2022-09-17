@@ -53,7 +53,8 @@ exports.loginUser = (req, res) => {
                 email: result.dataValues.email,
                 phone_number: result.dataValues.phone_number,
                 dob: result.dataValues.dob,
-                referral: result.dataValues.referral,
+                referral_id: result.dataValues.referral_id,
+                referral_code: result.dataValues.referral_code,
                 acctype: result.dataValues.acctype,
                 _id: result.dataValues.id
             };
@@ -95,11 +96,13 @@ exports.registerUser = (req, res) => {
     const password = req.body.password;
     const hashedPassword = password;
 
+    const code = generateRandomString(8);
+
     User.findOrCreate({ 
         where: { 
             [Op.or]: [{phone_number: phone_number}, {email: email}]
         },    
-        defaults: { firstname: firstname, lastname: lastname, email: email, dob: dob, referral: referral, password: hashedPassword, phone_number: phone_number, isActive: 1, acctype: acctype}
+        defaults: { firstname: firstname, lastname: lastname, email: email, dob: dob, referral_id: referral, referral_code: code, password: hashedPassword, phone_number: phone_number, isActive: 1, acctype: acctype}
         }).then(([result, created]) => {
             if((result != null) && (created == false) ){
                 res.status(302).json({
@@ -127,5 +130,20 @@ exports.registerUser = (req, res) => {
 exports.verifyAccount = (req, res) => {
     const {token} = req.params;
 }
+
+
+const generateRandomString = (myLength) => {
+    const chars =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+    const randomArray = Array.from(
+        { length: myLength },
+        (v, k) => chars[Math.floor(Math.random() * chars.length)]
+    );
+
+    const randomString = randomArray.join("");
+    // console.log("this is the randomString", randomString);
+    return randomString;
+
+};
 
 

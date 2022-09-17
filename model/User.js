@@ -16,7 +16,8 @@ const User = sequelize.define('users', {
     dob: Sequelize.STRING,
     acctype: Sequelize.STRING,
     password: Sequelize.STRING,
-    referral: Sequelize.INTEGER,
+    referral_id: Sequelize.STRING,
+    referral_code: Sequelize.STRING,
     isVerified: Sequelize.BOOLEAN,
     isActive: Sequelize.BOOLEAN,
 });
