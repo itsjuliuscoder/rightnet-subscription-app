@@ -254,7 +254,6 @@ exports.getUserDetails = (req, res) => {
         })
 }
 
-
 const generateRandomString = (myLength) => {
     const chars =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
@@ -268,5 +267,3 @@ const generateRandomString = (myLength) => {
     return randomString;
 
 };
-
-

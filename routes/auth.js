@@ -44,7 +44,7 @@ router.post(
             .isLength({ min: 7, max: 11 }),
         body('pin')
             .trim()
-            .isLength({ min: 4, max: 4 }),
+            .isLength({ min: 4, max: 10 }),
     ],
     UserController.createPin);
 
