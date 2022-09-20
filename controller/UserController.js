@@ -64,6 +64,7 @@ exports.loginUser = (req, res) => {
                 } else {
                     const data = {
                         wallet_balance: resp.dataValues.balance,
+                        bonus_amount: resp.dataValues.bonus,
                         firstname: result.dataValues.firstname,
                         lastname: result.dataValues.lastname,
                         email: result.dataValues.email,
@@ -133,12 +134,12 @@ exports.registerUser = (req, res) => {
                 });
             } 
             else {
-                console.log("this is the result -->", result.dataValues.id);
+                // console.log("this is the result -->", result.dataValues.id);
                 Wallet.findOrCreate({
                     where: { 
                         [Op.or]: [{user_id: result.dataValues.id}, {phone_number: phone_number}]
                     },    
-                    defaults: { user_id: result.dataValues.id, fullname: fullname, balance: "100", phone_number: phone_number, isActive: 1}
+                    defaults: { user_id: result.dataValues.id, fullname: fullname, balance: "0", bonus: "1000", phone_number: phone_number, isActive: 1}
                 }).then(([result, created]) => {
                     if((result != null) && (created == false) ){
                         res.status(302).json({

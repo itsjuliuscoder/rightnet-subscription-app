@@ -13,6 +13,7 @@ const Wallet = sequelize.define('wallet', {
     fullname: Sequelize.STRING,
     phone_number: Sequelize.STRING,
     balance: Sequelize.STRING,
+    bonus: Sequelize.STRING,
     isActive: Sequelize.BOOLEAN,
 });
 

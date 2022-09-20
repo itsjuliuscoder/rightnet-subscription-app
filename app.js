@@ -30,7 +30,7 @@ app.use(bodyParser.json());
 app.use('/v1/auth', authRoutesHandler);
 
 // User.sync({ force: true });
-//Pin.sync({ force: true });
+// Wallet.sync({ force: true });
 
 app.get('/', (req, res) => {
     res.send({
