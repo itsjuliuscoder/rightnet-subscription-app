@@ -6,6 +6,7 @@ const moment = require('moment');
 require('dotenv/config');
 const crypto = require('crypto');
 const User = require("../model/User");
+const Wallet = require("../model/Wallet");
 const Pin = require("../model/Pin");
 const Sequelize = require("sequelize");
 const { resolveSoa } = require('dns');
@@ -50,27 +51,43 @@ exports.loginUser = (req, res) => {
                 { expiresIn: '2h' }
             );
 
-            const data = {
-                firstname: result.dataValues.firstname,
-                lastname: result.dataValues.lastname,
-                email: result.dataValues.email,
-                phone_number: result.dataValues.phone_number,
-                dob: result.dataValues.dob,
-                referral_id: result.dataValues.referral_id,
-                referral_code: result.dataValues.referral_code,
-                acctype: result.dataValues.acctype,
-                isActive: result.dataValues.isActive,
-                isPin: result.dataValues.isPin,
-                _id: result.dataValues.id
-            };
+            Wallet.findOne({
+                where: { 
+                    [Op.and]: [{phone_number: phone_number}, {user_id: result.dataValues.id}, {isActive: 1}]
+                }
+            }).then((resp) => {
+                if(resp === null){
+                    res.status(404).json({
+                        statusCode: '015',
+                        statusMessage: 'Unable to fetch wallet details'
+                    });
+                } else {
+                    const data = {
+                        wallet_balance: resp.dataValues.balance,
+                        firstname: result.dataValues.firstname,
+                        lastname: result.dataValues.lastname,
+                        email: result.dataValues.email,
+                        phone_number: result.dataValues.phone_number,
+                        dob: result.dataValues.dob,
+                        referral_id: result.dataValues.referral_id,
+                        referral_code: result.dataValues.referral_code,
+                        acctype: result.dataValues.acctype,
+                        isActive: result.dataValues.isActive,
+                        isPin: result.dataValues.isPin,
+                        _id: result.dataValues.id
+                    };
+    
+                    res.status(200).json({
+                        statusCode: "000",
+                        statusMessage: "Login successful",
+                        payload: data,
+                        accessToken: token
+                    });
+                }
+            
+            }).catch((err) => {
 
-            res.status(200).json({
-                statusCode: "000",
-                statusMessage: "Login successful",
-                payload: data,
-                accessToken: token
             });
-
         }
     }).catch((err) => {
         res.status(403).json({
@@ -93,6 +110,7 @@ exports.registerUser = (req, res) => {
     const phone_number = req.body.phone_number;
     const firstname = req.body.firstname;
     const lastname = req.body.lastname;
+    const fullname = firstname + " " + lastname;
     const dob = req.body.dob;
     const email = req.body.email ? req.body.email : "";
     const referral = req.body.referral_code;
@@ -115,10 +133,28 @@ exports.registerUser = (req, res) => {
                 });
             } 
             else {
-                res.status(200).json({
-                    statusCode: "000",
-                    statusMessage: "User Registered Successful",
+                console.log("this is the result -->", result.dataValues.id);
+                Wallet.findOrCreate({
+                    where: { 
+                        [Op.or]: [{user_id: result.dataValues.id}, {phone_number: phone_number}]
+                    },    
+                    defaults: { user_id: result.dataValues.id, fullname: fullname, balance: "100", phone_number: phone_number, isActive: 1}
+                }).then(([result, created]) => {
+                    if((result != null) && (created == false) ){
+                        res.status(302).json({
+                            statusCode: "013",
+                            statusMessage: "Could not create wallet for new user"
+                        });
+                    } else {
+                        res.status(200).json({
+                            statusCode: "000",
+                            statusMessage: "User Registration Successful",
+                        })
+                    }
+                }).catch({
+
                 })
+                
             }
         }).catch(err => {
             res.status(403).json({

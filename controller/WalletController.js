@@ -12,3 +12,7 @@ const { resolveSoa } = require('dns');
 const Op = Sequelize.Op;
 const SHA256 = require('crypto-js/sha256');
 const CryptoJS = require('crypto-js');
+
+exports.getWalletDetails = (req, res) => {
+    
+}

@@ -18,6 +18,7 @@ const authRoutesHandler = require("./routes/auth");
 let timestamp = moment().format('YYYY-MM-DD HH:mm:ss');
 const User =  require("./model/User");
 const Pin = require("./model/Pin");
+const Wallet = require("./model/Wallet");
 const cors = require("cors"); 
 
 app.use(cors({
