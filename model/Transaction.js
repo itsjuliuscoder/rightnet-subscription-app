@@ -10,8 +10,11 @@ const Transaction = sequelize.define('transaction', {
         defaultValue: Sequelize.UUIDV4
     },
     user_id: Sequelize.STRING,
+    reference_id: Sequelize.STRING,
     fullname: Sequelize.STRING,
+    phone_number: Sequelize.STRING,
     amount: Sequelize.STRING,
+    previous_balance: Sequelize.STRING,
     description: Sequelize.STRING,
 });
 

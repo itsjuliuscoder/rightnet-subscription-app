@@ -7,6 +7,7 @@ require('dotenv/config');
 const crypto = require('crypto');
 const User = require("../model/User");
 const Wallet = require("../model/Wallet");
+const Transaction = require("../model/Transaction");
 const Pin = require("../model/Pin");
 const Sequelize = require("sequelize");
 const { resolveSoa } = require('dns');
@@ -235,6 +236,76 @@ exports.createPin = (req, res) => {
             });
             // console.error(err);
         })
+}
+
+exports.walletTransaction = (req, res) => {
+    const errors = validationResult(req);
+    if(!errors.isEmpty()){
+        return res.status(422).json({
+            statusCode: "012",
+            statusMessage: "Validation failed, request body is not valid",
+            errors: errors.array()
+        });
+    }
+
+
+    const phone_number = req.body.phone_number;
+    const reference_id = req.body.reference_id;
+    const user_id = req.body.user_id;
+    const fullname = req.body.fullname;
+    const amount = req.body.amount;
+    const previous_balance = req.body.previous_balance;
+    const description = req.body.description;
+    //const transactionPin = req.body.pin;
+    const current_balance = previous_balance + amount;
+
+    Transaction.findOrCreate({ 
+            where: { 
+                [Op.and]: [{reference_id: reference_id}, {user_id: user_id}, {phone_number: phone_number}]
+            },    
+            defaults: { user_id: user_id, phone_number: phone_number, reference_id: reference_id, fullname: fullname, amount: amount, previous_balance: previous_balance, description: description}
+        }).then(([result, created]) => {
+            if((result != null) && (created == false) ){
+                res.status(302).json({
+                    statusCode: "013",
+                    statusMessage: "Duplicate Reference ID!"
+                });
+            } 
+            else {
+                Wallet.update(
+                    {
+                        balance: current_balance
+                    },
+                    { 
+                    where: { 
+                        [Op.and]: [{phone_number: phone_number}, {id: user_id} ]
+                    }
+                }).then((result) => {
+                    if(result == "null"){
+                        res.status(302).json({
+                            statusCode: "013",
+                            statusMessage: "Something went wrong"
+                        });
+                    } else {
+                        res.status(200).json({
+                            statusCode: "000",
+                            statusMessage: "Wallet Top Successuful!",
+                        })
+                    }
+                }).catch((err) => {
+                    res.status(403).json({
+                        statusCode: "016",
+                        statusMessage: err.message
+                    });
+                });
+            }  
+            
+        }).catch(() => {
+
+        })
+
+
+
 }
 
 exports.getUserDetails = (req, res) => {
