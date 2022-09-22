@@ -256,7 +256,6 @@ exports.walletTransaction = (req, res) => {
     const previous_balance = req.body.previous_balance;
     const description = req.body.description;
     //const transactionPin = req.body.pin;
-    const current_balance = previous_balance + amount;
 
     Transaction.findOrCreate({ 
             where: { 
@@ -271,13 +270,15 @@ exports.walletTransaction = (req, res) => {
                 });
             } 
             else {
+                const current_balance = parseInt(previous_balance) + parseInt(amount);
+                console.log("current balance her -->", current_balance);
                 Wallet.update(
                     {
                         balance: current_balance
                     },
                     { 
                     where: { 
-                        [Op.and]: [{phone_number: phone_number}, {id: user_id} ]
+                        user_id: user_id
                     }
                 }).then((result) => {
                     if(result == "null"){
@@ -286,6 +287,7 @@ exports.walletTransaction = (req, res) => {
                             statusMessage: "Something went wrong"
                         });
                     } else {
+                        console.log("result here -->", result);
                         res.status(200).json({
                             statusCode: "000",
                             statusMessage: "Wallet Top Successuful!",

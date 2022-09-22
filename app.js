@@ -32,7 +32,7 @@ app.use('/v1/auth', authRoutesHandler);
 
 // User.sync({ force: true });
 // Wallet.sync({ force: true });
-// Transaction.sync({ force: true });
+//Transaction.sync({ force: true });
 
 app.get('/', (req, res) => {
     res.send({
