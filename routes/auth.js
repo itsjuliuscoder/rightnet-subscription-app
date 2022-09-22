@@ -32,6 +32,18 @@ router.post(
     UserController.getUserDetails);
 
 router.post(
+    '/getTransaction',
+    [
+        body('user_id')
+            .trim()
+            .isLength({ min: 7, max: 50 }),
+        body('phone_number')
+            .trim()
+            .isLength({ min: 7, max: 11 }),
+    ],
+    UserController.getTransaction);
+
+router.post(
     '/create_transactionPin',
     privateAuth,
     [

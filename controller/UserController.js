@@ -384,6 +384,47 @@ exports.getUserDetails = (req, res) => {
         })
 }
 
+exports.getTransaction = (req, res) => {
+    const errors = validationResult(req);
+    if(!errors.isEmpty()){
+        return res.status(422).json({
+            statusCode: "012",
+            statusMessage: "Validation failed, request body is not valid",
+            errors: errors.array()
+        });
+    }
+
+    const phone_number = req.body.phone_number;
+    const user_id = req.body.user_id;
+    
+
+    Transaction.findAll({ 
+        where: { 
+            user_id: user_id
+        }
+        }).then((result) => {
+            if((result === null)){
+                res.status(302).json({
+                    statusCode: "013",
+                    statusMessage: "No Transaction Found!"
+                });
+            } 
+            else {
+                // console.log("this is the transaction --> ", result);
+                res.status(200).json({
+                    statusCode: "000",
+                    statusMessage: "Transaction Data retrieved successfully",
+                    data: result
+                });
+            }
+        }).catch(err => {
+            res.status(403).json({
+                statusCode: "016",
+                statusMessage: err.message
+            });
+        })
+}
+
 const generateRandomString = (myLength) => {
     const chars =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
