@@ -248,7 +248,6 @@ exports.walletTransaction = (req, res) => {
         });
     }
 
-
     const phone_number = req.body.phone_number;
     const reference_id = req.body.reference_id;
     const user_id = req.body.user_id;
@@ -300,8 +299,11 @@ exports.walletTransaction = (req, res) => {
                 });
             }  
             
-        }).catch(() => {
-
+        }).catch((err) => {
+            res.status(403).json({
+                statusCode: "016",
+                statusMessage: err.message
+            });
         })
 
 
