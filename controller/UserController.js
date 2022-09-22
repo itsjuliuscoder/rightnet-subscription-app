@@ -338,24 +338,42 @@ exports.getUserDetails = (req, res) => {
                 });
             } 
             else {
-                const data = {
-                    firstname: result.dataValues.firstname,
-                    lastname: result.dataValues.lastname,
-                    email: result.dataValues.email,
-                    phone_number: result.dataValues.phone_number,
-                    dob: result.dataValues.dob,
-                    referral_id: result.dataValues.referral_id,
-                    referral_code: result.dataValues.referral_code,
-                    acctype: result.dataValues.acctype,
-                    isActive: result.dataValues.isActive,
-                    isPin: result.dataValues.isPin,
-                    _id: result.dataValues.id
-                };
+                Wallet.findOne({
+                    where: { 
+                        [Op.and]: [{phone_number: phone_number}, {user_id: user_id}, {isActive: 1}]
+                    }
+                }).then((resp) => {
+                    if(resp === null){
+                        res.status(404).json({
+                            statusCode: '015',
+                            statusMessage: 'Unable to fetch wallet details'
+                        });
+                    } else {
+                        const data = {
+                            wallet_balance: resp.dataValues.balance,
+                            bonus_amount: resp.dataValues.bonus,
+                            firstname: result.dataValues.firstname,
+                            lastname: result.dataValues.lastname,
+                            email: result.dataValues.email,
+                            phone_number: result.dataValues.phone_number,
+                            dob: result.dataValues.dob,
+                            referral_id: result.dataValues.referral_id,
+                            referral_code: result.dataValues.referral_code,
+                            acctype: result.dataValues.acctype,
+                            isActive: result.dataValues.isActive,
+                            isPin: result.dataValues.isPin,
+                            _id: result.dataValues.id
+                        };
+        
+                        res.status(200).json({
+                            statusCode: "000",
+                            statusMessage: "User Details Retrieved Successfully",
+                            payload: data,
+                        });
+                    }
+                
+                }).catch((err) => {
     
-                res.status(200).json({
-                    statusCode: "000",
-                    statusMessage: "User details retrieved successfully",
-                    payload: data
                 });
             }
         }).catch(err => {

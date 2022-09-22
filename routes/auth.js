@@ -21,7 +21,6 @@ router.post(
 
 router.post(
     '/get_UserDetails',
-    privateAuth,
     [
         body('user_id')
             .trim()
