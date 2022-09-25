@@ -20,6 +20,7 @@ const User =  require("./model/User");
 const Pin = require("./model/Pin");
 const Wallet = require("./model/Wallet");
 const Transaction = require("./model/Transaction");
+const Notification = require("./model/Notification");
 const cors = require("cors"); 
 
 app.use(cors({
@@ -32,7 +33,7 @@ app.use('/v1/auth', authRoutesHandler);
 
 // User.sync({ force: true });
 // Wallet.sync({ force: true });
-//Transaction.sync({ force: true });
+// Notification.sync({ force: true });
 
 app.get('/', (req, res) => {
     res.send({

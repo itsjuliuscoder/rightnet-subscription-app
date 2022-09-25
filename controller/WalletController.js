@@ -16,3 +16,24 @@ const CryptoJS = require('crypto-js');
 exports.getWalletDetails = (req, res) => {
     
 }
+
+exports.getAirtimeBalance = (req, res) => {
+
+}
+
+exports.getDataBalance = (req, res) => {
+
+}
+
+exports.purchaseAirtime = (req, res) => {
+
+}
+
+exports.purchaseData = (req, res) => {
+
+}
+
+exports.getAllServices = (req, res) => {
+
+}
+

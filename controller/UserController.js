@@ -401,7 +401,8 @@ exports.getTransaction = (req, res) => {
     Transaction.findAll({ 
         where: { 
             user_id: user_id
-        }
+        }, 
+        order: [Sequelize.col('created_at'), 'DESC'],
         }).then((result) => {
             if((result === null)){
                 res.status(302).json({
