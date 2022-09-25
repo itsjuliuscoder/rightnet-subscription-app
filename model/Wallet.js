@@ -14,6 +14,7 @@ const Wallet = sequelize.define('wallet', {
     phone_number: Sequelize.STRING,
     balance: Sequelize.STRING,
     bonus: Sequelize.STRING,
+    referral: Sequelize.STRING,
     isActive: Sequelize.BOOLEAN,
 });
 

@@ -115,7 +115,7 @@ exports.registerUser = (req, res) => {
     const fullname = firstname + " " + lastname;
     const dob = req.body.dob;
     const email = req.body.email ? req.body.email : "";
-    const referral = req.body.referral_code;
+    const referral = req.body.referral_code ? req.body.referral_code : "";
     const acctype = req.body.acctype;
     const password = req.body.password;
     const hashedPassword = password;
@@ -126,7 +126,7 @@ exports.registerUser = (req, res) => {
         where: { 
             [Op.or]: [{phone_number: phone_number}, {email: email}]
         },    
-        defaults: { firstname: firstname, lastname: lastname, email: email, dob: dob, referral_id: referral, referral_code: code, password: hashedPassword, phone_number: phone_number, isActive: 1, isPin: 0, acctype: acctype}
+        defaults: { firstname: firstname, lastname: lastname, email: email, dob: dob, referral_id: referral, referral_code: phone_number, password: hashedPassword, phone_number: phone_number, isActive: 1, isPin: 0, acctype: acctype}
         }).then(([result, created]) => {
             if((result != null) && (created == false) ){
                 res.status(302).json({
@@ -140,7 +140,7 @@ exports.registerUser = (req, res) => {
                     where: { 
                         [Op.or]: [{user_id: result.dataValues.id}, {phone_number: phone_number}]
                     },    
-                    defaults: { user_id: result.dataValues.id, fullname: fullname, balance: "0", bonus: "1000", phone_number: phone_number, isActive: 1}
+                    defaults: { user_id: result.dataValues.id, fullname: fullname, balance: "0", bonus: "100", referral: phone_number, phone_number: phone_number, isActive: 1}
                 }).then(([result, created]) => {
                     if((result != null) && (created == false) ){
                         res.status(302).json({
@@ -148,6 +148,31 @@ exports.registerUser = (req, res) => {
                             statusMessage: "Could not create wallet for new user"
                         });
                     } else {
+                        Wallet.findOne({
+                            where: {
+                                referral: referral
+                            }
+                        }).then((resp) => {
+                            if(resp != null){
+                                let phoneno = resp.dataValues.phone_number;
+                                let original_bonus = resp.dataValues.bonus;
+                                let new_bonus = original_bonus + 10;
+                                console.log("this is the response data -->", resp);
+                                console.log("this is the new bonus amount -->", new_bonus);
+                                console.log("this is the original bonus -->", original_bonus);
+                                Wallet.update(
+                                    {
+                                        bonus: new_bonus
+                                    },
+                                    { 
+                                    where: { 
+                                        [Op.and]: [{phone_number: phoneno}, {referral: referral} ]
+                                    }
+                                });
+                            }
+                        }).catch((err) => {
+                            console.log("this is the error issue -->", err);
+                        });
                         res.status(200).json({
                             statusCode: "000",
                             statusMessage: "User Registration Successful",
@@ -270,7 +295,7 @@ exports.walletTransaction = (req, res) => {
                 });
             } 
             else {
-                const current_balance = parseInt(previous_balance) + parseInt(amount);
+                const current_balance = parseInt(amount) + parseInt(previous_balance);
                 console.log("current balance her -->", current_balance);
                 Wallet.update(
                     {
