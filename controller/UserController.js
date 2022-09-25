@@ -402,7 +402,7 @@ exports.getTransaction = (req, res) => {
         where: { 
             user_id: user_id
         }, 
-        order: [Sequelize.col('created_at'), 'DESC'],
+        order: [Sequelize.col('createdAt'), 'DESC'],
         }).then((result) => {
             if((result === null)){
                 res.status(302).json({
