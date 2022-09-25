@@ -402,8 +402,11 @@ exports.getTransaction = (req, res) => {
         where: { 
             user_id: user_id
         }, 
-        order: ['createdAt','DESC'],
+        order: [
+            ["createdAt", "DESC"],
+        ],
         }).then((result) => {
+            // console.log("this is the result -->", result);
             if((result === null)){
                 res.status(302).json({
                     statusCode: "013",
