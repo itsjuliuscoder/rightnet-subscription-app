@@ -156,7 +156,7 @@ exports.registerUser = (req, res) => {
                             if(resp != null){
                                 let phoneno = resp.dataValues.phone_number;
                                 let original_bonus = resp.dataValues.bonus;
-                                let new_bonus = original_bonus + 10;
+                                let new_bonus = parseInt(original_bonus) + 10;
                                 console.log("this is the response data -->", resp);
                                 console.log("this is the new bonus amount -->", new_bonus);
                                 console.log("this is the original bonus -->", original_bonus);
