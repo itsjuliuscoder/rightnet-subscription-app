@@ -15,6 +15,7 @@ require('dotenv/config');
 const logger = require('./logger');
 const moment = require('moment');
 const authRoutesHandler = require("./routes/auth");
+const walletRoutesHandler = require("./routes/wallet");
 let timestamp = moment().format('YYYY-MM-DD HH:mm:ss');
 const User =  require("./model/User");
 const Pin = require("./model/Pin");
@@ -30,6 +31,7 @@ app.use(cors({
 app.use(bodyParser.json()); 
 
 app.use('/v1/auth', authRoutesHandler);
+app.use('/v1/wallet', walletRoutesHandler);
 
 // User.sync({ force: true });
 // Wallet.sync({ force: true });

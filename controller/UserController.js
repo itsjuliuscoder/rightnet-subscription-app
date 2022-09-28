@@ -210,7 +210,11 @@ exports.createPin = (req, res) => {
     const user_id = req.body.user_id;
     const transactionPin = req.body.pin;
 
-    const hashedPin = CryptoJS.AES.encrypt(transactionPin, process.env.SECRET_KEY).toString();
+    let bufferObj = Buffer.from(transactionPin, "utf8");
+
+    let hashedPin = bufferObj.toString("base64");
+
+    // const hashedPin = CryptoJS.AES.encrypt(transactionPin, process.env.SECRET_KEY).toString();
 
     // console.log("this is the hashed pin", hashedPin);
 
