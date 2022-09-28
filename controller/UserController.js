@@ -64,8 +64,8 @@ exports.loginUser = (req, res) => {
                     });
                 } else {
                     const data = {
-                        wallet_balance: resp.dataValues.balance,
-                        bonus_amount: resp.dataValues.bonus,
+                        wallet_balance: parseInt(resp.dataValues.balance),
+                        bonus_amount: parseInt(resp.dataValues.bonus),
                         firstname: result.dataValues.firstname,
                         lastname: result.dataValues.lastname,
                         email: result.dataValues.email,
