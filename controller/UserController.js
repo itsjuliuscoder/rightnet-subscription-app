@@ -140,7 +140,7 @@ exports.registerUser = (req, res) => {
                     where: { 
                         [Op.or]: [{user_id: result.dataValues.id}, {phone_number: phone_number}]
                     },    
-                    defaults: { user_id: result.dataValues.id, fullname: fullname, balance: "0", bonus: "100", referral: phone_number, phone_number: phone_number, isActive: 1}
+                    defaults: { user_id: result.dataValues.id, fullname: fullname, balance: 0, bonus: 100, referral: phone_number, phone_number: phone_number, isActive: 1}
                 }).then(([result, created]) => {
                     if((result != null) && (created == false) ){
                         res.status(302).json({

@@ -26,7 +26,16 @@ exports.getDataBalance = (req, res) => {
 }
 
 exports.purchaseAirtime = (req, res) => {
+    const errors = validationResult(req);
+    if(!errors.isEmpty()){
+        return res.status(422).json({
+            statusCode: "012",
+            statusMessage: "Validation failed, request body is not valid",
+            errors: errors.array()
+        });
+    }
 
+    
 }
 
 exports.purchaseData = (req, res) => {
