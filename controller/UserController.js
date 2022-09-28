@@ -295,7 +295,7 @@ exports.walletTransaction = (req, res) => {
                 });
             } 
             else {
-                const current_balance = parseInt(amount) + parseInt(previous_balance);
+                const current_balance = parseInt(previous_balance) + parseInt(amount);
                 console.log("current balance her -->", current_balance);
                 Wallet.update(
                     {
