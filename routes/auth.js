@@ -72,12 +72,6 @@ router.post(
         body('phone_number')
             .trim()
             .isLength({ min: 7, max: 11 }),
-        body('amount')
-            .trim()
-            .isLength({ min: 1, max: 10 }),
-        body('previous_balance')
-            .trim()
-            .isLength({ min: 1, max: 14 }),
         body('description')
             .trim()
             .isLength({ min: 4, max: 2000 }),
