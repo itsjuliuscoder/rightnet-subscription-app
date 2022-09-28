@@ -295,33 +295,71 @@ exports.walletTransaction = (req, res) => {
                 });
             } 
             else {
-                const current_balance = parseInt(previous_balance) + parseInt(amount);
-                Wallet.update(
-                    {
-                        balance: current_balance
-                    },
-                    { 
+                Wallet.findOne({
                     where: { 
-                        user_id: user_id
+                        [Op.and]: [{phone_number: phone_number}, {user_id: user_id}, {isActive: 1}]
                     }
-                }).then((result) => {
-                    if(result == "null"){
-                        res.status(302).json({
-                            statusCode: "013",
-                            statusMessage: "Something went wrong"
+                }).then((resp) => {
+                    if(resp === null){
+                        res.status(404).json({
+                            statusCode: '015',
+                            statusMessage: 'Unable to fetch wallet details'
                         });
                     } else {
-                        console.log("result here -->", result);
+                        const data = {
+                            wallet_balance: parseInt(resp.dataValues.balance),
+                            bonus_amount: resp.dataValues.bonus,
+                            firstname: result.dataValues.firstname,
+                            lastname: result.dataValues.lastname,
+                            email: result.dataValues.email,
+                            phone_number: result.dataValues.phone_number,
+                            dob: result.dataValues.dob,
+                            referral_id: result.dataValues.referral_id,
+                            referral_code: result.dataValues.referral_code,
+                            acctype: result.dataValues.acctype,
+                            isActive: result.dataValues.isActive,
+                            isPin: result.dataValues.isPin,
+                            _id: result.dataValues.id
+                        };
+
+                        const current_balance = data.wallet_balance + amount;
+                        Wallet.update(
+                            {
+                                balance: current_balance
+                            },
+                            { 
+                            where: { 
+                                user_id: user_id
+                            }
+                        }).then((result) => {
+                            if(result == "null"){
+                                res.status(302).json({
+                                    statusCode: "013",
+                                    statusMessage: "Something went wrong"
+                                });
+                            } else {
+                                console.log("result here -->", result);
+                                res.status(200).json({
+                                    statusCode: "000",
+                                    statusMessage: "Wallet Top Successuful!",
+                                })
+                            }
+                        }).catch((err) => {
+                            res.status(403).json({
+                                statusCode: "016",
+                                statusMessage: err.message
+                            });
+                        });
+        
                         res.status(200).json({
                             statusCode: "000",
-                            statusMessage: "Wallet Top Successuful!",
-                        })
+                            statusMessage: "User Details Retrieved Successfully",
+                            payload: data,
+                        });
                     }
+                
                 }).catch((err) => {
-                    res.status(403).json({
-                        statusCode: "016",
-                        statusMessage: err.message
-                    });
+    
                 });
             }  
             
