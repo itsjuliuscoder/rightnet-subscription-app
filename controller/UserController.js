@@ -322,7 +322,8 @@ exports.walletTransaction = (req, res) => {
                             _id: result.dataValues.id
                         };
 
-                        const current_balance = data.wallet_balance + amount;
+                        const current_balance = (data.wallet_balance) + parseInt(amount);
+                        console.log("this is the wallet balance --> ", current_balance)
                         Wallet.update(
                             {
                                 balance: current_balance
@@ -338,7 +339,7 @@ exports.walletTransaction = (req, res) => {
                                     statusMessage: "Something went wrong"
                                 });
                             } else {
-                                console.log("result here -->", result);
+                                // console.log("result here -->", result);
                                 res.status(200).json({
                                     statusCode: "000",
                                     statusMessage: "Wallet Top Successuful!",
@@ -351,11 +352,7 @@ exports.walletTransaction = (req, res) => {
                             });
                         });
         
-                        res.status(200).json({
-                            statusCode: "000",
-                            statusMessage: "User Details Retrieved Successfully",
-                            payload: data,
-                        });
+                        
                     }
                 
                 }).catch((err) => {
