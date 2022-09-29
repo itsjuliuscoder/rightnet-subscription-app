@@ -31,6 +31,9 @@ router.post(
         body('phone_number')
             .trim()
             .isLength({ min: 1, max: 20 }),
+        body('pin')
+            .trim()
+            .isLength({ min: 4, max: 4 })
     ],
     WalletController.purchaseAirtime);
 
@@ -55,7 +58,10 @@ router.post(
             .isLength({ min: 6, max: 50 }),
         body('phone_number')
             .trim()
-            .isLength({ min: 1, max: 20 })
+            .isLength({ min: 1, max: 20 }),
+        body('pin')
+            .trim()
+            .isLength({ min: 4, max: 4 })
     ],
     WalletController.purchaseData);
 
