@@ -31,9 +31,6 @@ router.post(
         body('phone_number')
             .trim()
             .isLength({ min: 1, max: 20 }),
-        body('walletBalance')
-            .trim()
-            .isLength({ min: 1, max: 20 }),
     ],
     WalletController.purchaseAirtime);
 
