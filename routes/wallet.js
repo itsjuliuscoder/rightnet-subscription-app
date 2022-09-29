@@ -5,6 +5,7 @@ const privateAuth = require("../middleware/privateAuth");
 
 const router = express.Router();
 
+router.get('/getAllProducts', WalletController.getAllServices);
 
 router.post(
     '/buyAirtime',
@@ -35,6 +36,31 @@ router.post(
             .isLength({ min: 1, max: 20 }),
     ],
     WalletController.purchaseAirtime);
+
+
+router.post(
+    '/buyData',
+    [
+        body('msisdn')
+            .trim()
+            .isLength({ min: 6, max: 20 }),
+        body('amount')
+            .trim()
+            .isLength({ min: 1, max: 20 }),
+        body('amount_charged')
+            .trim()
+            .isLength({ min: 1, max: 20 }),
+        body('user_id')
+            .trim()
+            .isLength({ min: 1, max: 50 }),
+        body('transactionId')
+            .trim()
+            .isLength({ min: 6, max: 50 }),
+        body('phone_number')
+            .trim()
+            .isLength({ min: 1, max: 20 })
+    ],
+    WalletController.purchaseData);
 
 // router.post(
 //     '/getTransaction',

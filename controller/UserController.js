@@ -290,7 +290,7 @@ exports.walletTransaction = (req, res) => {
             where: { 
                 [Op.and]: [{reference_id: reference_id}, {user_id: user_id}, {phone_number: phone_number}]
             },    
-            defaults: { user_id: user_id, phone_number: phone_number, reference_id: reference_id, fullname: fullname, amount: amount, previous_balance: previous_balance, description: description}
+            defaults: { user_id: user_id, phone_number: phone_number, reference_id: reference_id, fullname: fullname, amount: amount, previous_balance: previous_balance, description: description, transStatus: "Processing", statusCode: "001"  }
         }).then(([result, created]) => {
             if((result != null) && (created == false) ){
                 res.status(302).json({

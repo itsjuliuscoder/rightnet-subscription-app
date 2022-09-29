@@ -15,6 +15,8 @@ const Transaction = sequelize.define('transaction', {
     phone_number: Sequelize.STRING,
     amount: Sequelize.STRING,
     transtype: Sequelize.STRING,
+    transStatus: Sequelize.STRING,
+    statusCode: Sequelize.STRING,
     previous_balance: Sequelize.STRING,
     description: Sequelize.STRING,
 });
