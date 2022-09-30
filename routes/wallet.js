@@ -7,6 +7,8 @@ const router = express.Router();
 
 router.get('/getAllProducts', WalletController.getAllServices);
 
+router.get('/testAirtime', WalletController.testAirtime);
+
 router.post(
     '/buyAirtime',
     [

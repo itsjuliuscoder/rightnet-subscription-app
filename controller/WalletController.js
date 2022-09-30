@@ -44,6 +44,32 @@ exports.getDataBalance = (req, res) => {
 
 }
 
+const processAirtimeData = async (data) => {
+    let respMessage;
+    
+    console.log("this is the request body -->", data);
+
+    console.log("this is the correlation id -->", data.correlationId);
+    
+    const mtnConfig = {
+        headers: {
+            'x-country-code': "NG",
+                    'x-api-key': "v0nHtqiYAe2InBmoaMZ2G4DjcRjlcL3V",
+                    'Credentials': "ZGlyZWN0Y29ubmVjdHVzZXIwMTpWN3B0SFdOMEs4MXVvbA==",
+                    'transactionId': data.correlationId
+        }
+    }
+
+    
+
+    // const response = await axios.post('https://preprod-nigeria.api.mtn.com/v2/customers/2348031011125/subscriptions', data, mtnConfig);
+
+    // console.log("this is the response gotten", response.data);
+
+    //return response;
+
+}
+
 exports.purchaseAirtime = (req, res) => {
     const errors = validationResult(req);
     if(!errors.isEmpty()){
@@ -52,9 +78,7 @@ exports.purchaseAirtime = (req, res) => {
             statusMessage: "Validation failed, request body is not valid",
             errors: errors.array()
         });
-    }
-
-    
+    }    
 
     const static_number = "2348031011125";
     const beneficiary_number = req.body.msisdn;
@@ -65,7 +89,13 @@ exports.purchaseAirtime = (req, res) => {
     const user_id = req.body.user_id;
     const walletBalance = req.body.walletBalance;
 
-    const payload = {
+    console.log("this is the amount -->", amount);
+    console.log("this is the transactionId -->", transactionId);
+    console.log("this is phone_number -->", phone_number);
+    console.log("this is user_id -->", user_id);
+
+
+    const body = {
         subscriptionId: "1",
         beneficiaryId: "2349132058219",
         amountCharged: amount,
@@ -73,7 +103,7 @@ exports.purchaseAirtime = (req, res) => {
         correlationId: transactionId
     }
 
-    console.log("this is the transaction payload -->", payload);
+    console.log("this is the transaction payload -->", body);
 
     let bufferObj = Buffer.from(transactionPin, "utf8");
 
@@ -81,6 +111,8 @@ exports.purchaseAirtime = (req, res) => {
 
     // const hashedPin = CryptoJS.AES.encrypt(transactionPin, process.env.SECRET_KEY).toString();
     console.log("this is the hashedPin -->", hashedPin);
+
+    const fullname = "User with phone number " + phone_number;
 
     Pin.findOne({
         where: { 
@@ -100,112 +132,25 @@ exports.purchaseAirtime = (req, res) => {
                 method: 'post',
                 headers: {
                     'x-country-code': "NG",
-                    'x-api-key': "v0nHtqiYAe2InBmoaMZ2G4DjcRjlcL3V",
-                    'Credentials': "ZGlyZWN0Y29ubmVjdHVzZXIwMTpWN3B0SFdOMEs4MXVvbA==",
-                    'transactionId': transactionId
+                            'x-api-key': "v0nHtqiYAe2InBmoaMZ2G4DjcRjlcL3V",
+                            'Credentials': "ZGlyZWN0Y29ubmVjdHVzZXIwMTpWN3B0SFdOMEs4MXVvbA==",
+                            'transactionId': body.correlationId
                 },
-                url: `https://preprod-nigeria.api.mtn.com/v2/customers/${static_number}/subscriptions`,
-                data: payload
+                url: 'https://preprod-nigeria.api.mtn.com/v2/customers/2348031011125/subscriptions',
+                data: body
             }).then((response) => {
                 if(response.data.statusCode == "0000"){
-                    Transaction.findOrCreate({ 
-                        where: { 
-                            [Op.and]: [{reference_id: transactionId}, {user_id: user_id}, {phone_number: phone_number}]
-                        },    
-                        defaults: { user_id: user_id, phone_number: phone_number, reference_id: reference_id, fullname: fullname, amount: amount, previous_balance: previous_balance, description: description}
-                    }).then(([result, created]) => {
-                        if((result != null) && (created == false) ){
-                            res.status(302).json({
-                                statusCode: "013",
-                                statusMessage: "Duplicate Reference ID!"
-                            });
-                        } 
-                        else {
-                            
-                            Wallet.findOne({
-                                where: { 
-                                    [Op.and]: [{phone_number: phone_number}, {user_id: user_id}, {isActive: 1}]
-                                }
-                            }).then((result) => {
-                                if(resp === null){
-                                    res.status(404).json({
-                                        statusCode: '015',
-                                        statusMessage: 'Unable to fetch wallet details'
-                                    });
-                                } else {
-                                    const data = {
-                                        wallet_balance: parseInt(resp.dataValues.balance),
-                                        bonus_amount: resp.dataValues.bonus,
-                                        firstname: result.dataValues.firstname,
-                                        lastname: result.dataValues.lastname,
-                                        email: result.dataValues.email,
-                                        phone_number: result.dataValues.phone_number,
-                                        dob: result.dataValues.dob,
-                                        referral_id: result.dataValues.referral_id,
-                                        referral_code: result.dataValues.referral_code,
-                                        acctype: result.dataValues.acctype,
-                                        isActive: result.dataValues.isActive,
-                                        isPin: result.dataValues.isPin,
-                                        _id: result.dataValues.id
-                                    };
-                                    const current_balance = data.wallet_balance - parseInt(req.body.amount_charged);
-                                    Wallet.update(
-                                        {
-                                            balance: current_balance
-                                        },
-                                        { 
-                                        where: { 
-                                            user_id: user_id
-                                        }
-                                    }).then((result) => {
-                                        if(result == "null"){
-                                            res.status(302).json({
-                                                statusCode: "013",
-                                                statusMessage: "Something went wrong"
-                                            });
-                                        } else {
-                                            res.status(200).json({
-                                                statusCode: response.data.statusCode,
-                                                statusMessage: response.data.statusMessage,
-                                                beneficiaryId: response.data.beneficiaryId,
-                                                transactionId: response.data.transactionId,
-                                                subscriptionStatus: response.data.subscriptionStatus
-                                            }); 
-                                        }
-                                    }).catch((err) => {
-                                        res.status(403).json({
-                                            statusCode: "016",
-                                            statusMessage: err.message
-                                        });
-                                    });
-                                }
-                            }).catch((err) => {
-                                
-                            })
-                        }                          
-                    }).catch((err) => {
-                        res.status(403).json({
-                            statusCode: "016",
-                            statusMessage: err.message
-                        });
-                    })
-                }
-        
-                console.log("success response from MTN --> " + JSON.stringify(response.data));
-                
+                    // console.log("this is the response data", response.data);
+                    res.status(200).json({
+                        statusCode: response.data.statusCode,
+                        statusMessage: response.data.statusMessage,
+                        transactionId: response.data.transactionId,
+                        subscriptionStatus: response.data.subscriptionStatus
+                    });
+                }               
             }).catch((error) => {
-                if(error){
-                    console.log(" Error response MTN --> " + JSON.stringify(error));
-                    res.status(303).json({
-                        statusCode: error.response.data.status ? error.response.data.status : "019",
-                        statusMessage: error.response.data.message ? error.response.data.message : "An error occured",
-                    }); 
-                } else {
-                    res.status(303).json({
-                        statusCode: "019",
-                        statusMessage: "An error occured",
-                    }); 
-                }
+                console.log("this is the error", error.response);
+                // return response.data;
             });
         }
     })
@@ -366,7 +311,57 @@ exports.getAllServices = (req, res) => {
         });
         console.log("this is the response data", JSON.stringify(response.data));
     }).catch((err) => {
-        console.log("this is the response data", err.response.data);
+        res.status(400).json({
+            statusCode: err.status,
+            statusMessage: err.message
+        });
+        //console.log("this is the response data", err.response.data);
     })
+}
+
+exports.testAirtime = (req, res) => {
+
+    const body = {
+        subscriptionId: "1",
+        beneficiaryId: "2349132058219",
+        amountCharged: "20",
+        subscriptionProviderId:"ERS",
+        correlationId:"124312109983122435"
+    }
+
+    axios({
+        method: 'post',
+        headers: {
+            "transactionId": body.correlationId,
+            "Credentials": "ZGlyZWN0Y29ubmVjdHVzZXIwMTpWN3B0SFdOMEs4MXVvbA==",
+            "x-country-code": "NG",
+            "x-api-key": "v0nHtqiYAe2InBmoaMZ2G4DjcRjlcL3V"
+        },
+        url: 'https://preprod-nigeria.api.mtn.com/v2/customers/2348031011125/subscriptions',
+        data: body
+    }).then((response) => {
+        if(response.data.statusCode == "0000"){
+            res.status(200).json({
+                statusCode: response.data.statusCode,
+                statusMessage: "Successful"
+            });
+        }
+
+        console.log("success response from MTN --> " + JSON.stringify(response.data));
+        
+    }).catch((error) => {
+        if(error != ""){
+            console.log(" Error response MTN --> " + JSON.stringify(error));
+            res.status(303).json({
+                statusCode: error.response && error.response.data.status ? error.response.data.status : "019",
+                statusMessage: error.response.data.message ? error.response.data.message : "An error occured",
+            }); 
+        } else {
+            res.status(303).json({
+                statusCode: "019",
+                statusMessage: "An error occured",
+            }); 
+        }
+    });
 }
 
