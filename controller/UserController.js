@@ -286,7 +286,7 @@ exports.walletTransaction = (req, res) => {
     const description = req.body.description;
     //const transactionPin = req.body.pin;
 
-    Transaction.findOrCreate({ 
+        Transaction.findOrCreate({ 
             where: { 
                 [Op.and]: [{reference_id: reference_id}, {user_id: user_id}, {phone_number: phone_number}]
             },    

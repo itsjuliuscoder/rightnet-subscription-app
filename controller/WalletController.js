@@ -103,14 +103,14 @@ exports.purchaseAirtime = (req, res) => {
         correlationId: transactionId
     }
 
-    console.log("this is the transaction payload -->", body);
+    // console.log("this is the transaction payload -->", body);
 
     let bufferObj = Buffer.from(transactionPin, "utf8");
 
     let hashedPin = bufferObj.toString("base64");
 
     // const hashedPin = CryptoJS.AES.encrypt(transactionPin, process.env.SECRET_KEY).toString();
-    console.log("this is the hashedPin -->", hashedPin);
+    // console.log("this is the hashedPin -->", hashedPin);
 
     const fullname = "User with phone number " + phone_number;
 
@@ -165,9 +165,9 @@ exports.purchaseAirtime = (req, res) => {
                                 _id: result.dataValues.id
                             };
                             const current_balance = data.wallet_balance - parseInt(Math.floor(req.body.amount_charged));
-                            console.log("this is the amount to charge", req.body.amount_charged);
-                            console.log("this is the previous balance", data.wallet_balance);
-                            console.log("this is the current balalnce after transaction", current_balance);
+                            // console.log("this is the amount to charge", req.body.amount_charged);
+                            // console.log("this is the previous balance", data.wallet_balance);
+                            // console.log("this is the current balalnce after transaction", current_balance);
 
                             Wallet.update(
                                 {
@@ -181,7 +181,22 @@ exports.purchaseAirtime = (req, res) => {
                                 if(result == "null"){
                                     console.log("Something went wrong, wallet update failed");
                                 } else {
-                                    console.log("update was successful", result);
+                                    // console.log("update was successful", result); 
+                                    let description = "The Airtime Top Up for this number " + phone_number;
+                                    Transaction.findOrCreate({ 
+                                        where: { 
+                                            [Op.and]: [{reference_id: body.correlationId}, {user_id: user_id}, {phone_number: phone_number}]
+                                        },    
+                                        defaults: { user_id: user_id, phone_number: phone_number, reference_id: body.correlationId, fullname: "Airtime TopUp", amount: amount, previous_balance: data.wallet_balance, description: description, transStatus: "Successful", transtype: "AIRTIME", statusCode: "000"  }
+                                    }).then(([result, created]) => {
+                                        if((result != null) && (created == false) ){
+                                            console.log("an error occurred, could not update transaction table");
+                                        } else {
+                                            // console.log("it was a success", result);
+                                        }
+                                    }).catch((err) => {
+                                        console.log("this is the error", err);
+                                    });
                                     res.status(200).json({
                                         statusCode: response.data.statusCode,
                                         statusMessage: response.data.statusMessage,
