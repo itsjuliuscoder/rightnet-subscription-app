@@ -140,13 +140,60 @@ exports.purchaseAirtime = (req, res) => {
                 data: body
             }).then((response) => {
                 if(response.data.statusCode == "0000"){
+                    Wallet.findOne({
+                        where: { 
+                            [Op.and]: [{phone_number: phone_number}, {user_id: user_id}, {isActive: 1}]
+                        }
+                    }).then((result) => {
+                        if(result === null){
+                            console.log("No wallet");
+                        } else {
+                            // console.log("wallet found --> ", result);
+                            const data = {
+                                wallet_balance: parseInt(result.dataValues.balance),
+                                bonus_amount: result.dataValues.bonus,
+                                firstname: result.dataValues.firstname,
+                                lastname: result.dataValues.lastname,
+                                email: result.dataValues.email,
+                                phone_number: result.dataValues.phone_number,
+                                dob: result.dataValues.dob,
+                                referral_id: result.dataValues.referral_id,
+                                referral_code: result.dataValues.referral_code,
+                                acctype: result.dataValues.acctype,
+                                isActive: result.dataValues.isActive,
+                                isPin: result.dataValues.isPin,
+                                _id: result.dataValues.id
+                            };
+                            const current_balance = data.wallet_balance - parseInt(Math.floor(req.body.amount_charged));
+                            console.log("this is the amount to charge", req.body.amount_charged);
+                            console.log("this is the previous balance", data.wallet_balance);
+                            console.log("this is the current balalnce after transaction", current_balance);
+
+                            Wallet.update(
+                                {
+                                    balance: current_balance
+                                },
+                                { 
+                                where: { 
+                                    user_id: user_id
+                                }
+                            }).then((result) => {
+                                if(result == "null"){
+                                    console.log("Something went wrong, wallet update failed");
+                                } else {
+                                    console.log("update was successful", result);
+                                    res.status(200).json({
+                                        statusCode: response.data.statusCode,
+                                        statusMessage: response.data.statusMessage,
+                                        transactionId: response.data.transactionId,
+                                        subscriptionStatus: response.data.subscriptionStatus,
+                                        walletBalance: current_balance
+                                    }); 
+                                }
+                            })
+                        }
+                    })
                     // console.log("this is the response data", response.data);
-                    res.status(200).json({
-                        statusCode: response.data.statusCode,
-                        statusMessage: response.data.statusMessage,
-                        transactionId: response.data.transactionId,
-                        subscriptionStatus: response.data.subscriptionStatus
-                    });
                 }               
             }).catch((error) => {
                 console.log("this is the error", error.response);
