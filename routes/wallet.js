@@ -49,6 +49,9 @@ router.post(
         body('amount')
             .trim()
             .isLength({ min: 1, max: 20 }),
+        body('transactionId')
+            .trim()
+            .isLength({ min: 1, max: 50 }),
         body('amount_charged')
             .trim()
             .isLength({ min: 1, max: 20 }),

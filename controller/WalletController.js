@@ -237,7 +237,14 @@ exports.purchaseData = (req, res) => {
     const user_id = req.body.user_id;
     const walletBalance = req.body.walletBalance;
 
-    const payload = {
+    console.log("this is the amount -->", amount);
+    console.log("this is the transactionId -->", transactionId);
+    console.log("this is phone_number -->", phone_number);
+    console.log("this is user_id -->", user_id);
+
+
+
+    const body = {
         subscriptionId: "9",
         beneficiaryId: "2349132058219",
         amountCharged: amount,
@@ -245,14 +252,16 @@ exports.purchaseData = (req, res) => {
         correlationId: transactionId
     }
 
-    console.log("this is the transaction payload -->", payload);
+    // console.log("this is the transaction payload -->", body);
 
     let bufferObj = Buffer.from(transactionPin, "utf8");
 
     let hashedPin = bufferObj.toString("base64");
 
     // const hashedPin = CryptoJS.AES.encrypt(transactionPin, process.env.SECRET_KEY).toString();
-    console.log("this is the hashedPin -->", hashedPin);
+    // console.log("this is the hashedPin -->", hashedPin);
+
+    const fullname = "User with phone number " + phone_number;
 
     Pin.findOne({
         where: { 
@@ -267,41 +276,48 @@ exports.purchaseData = (req, res) => {
                 statusMessage: "PIN failed",
             });
 
-        } else {
+        } else { 
             axios({
                 method: 'post',
                 headers: {
                     'x-country-code': "NG",
-                    'x-api-key': "v0nHtqiYAe2InBmoaMZ2G4DjcRjlcL3V",
-                    'Credentials': "ZGlyZWN0Y29ubmVjdHVzZXIwMTpWN3B0SFdOMEs4MXVvbA==",
-                    'transactionId': transactionId
+                            'x-api-key': "v0nHtqiYAe2InBmoaMZ2G4DjcRjlcL3V",
+                            'Credentials': "ZGlyZWN0Y29ubmVjdHVzZXIwMTpWN3B0SFdOMEs4MXVvbA==",
+                            'transactionId': body.correlationId
                 },
-                url: `https://preprod-nigeria.api.mtn.com/v2/customers/${static_number}/subscriptions`,
-                data: payload
+                url: 'https://preprod-nigeria.api.mtn.com/v2/customers/2348031011125/subscriptions',
+                data: body
             }).then((response) => {
                 if(response.data.statusCode == "0000"){
-                    Transaction.findOrCreate({ 
+                    Wallet.findOne({
                         where: { 
-                            [Op.and]: [{reference_id: transactionId}, {user_id: user_id}, {phone_number: phone_number}]
-                        },    
-                        defaults: { user_id: user_id, phone_number: phone_number, reference_id: reference_id, fullname: fullname, amount: amount, previous_balance: previous_balance, description: description}
-                    }).then(([result, created]) => {
-                        if((result != null) && (created == false) ){
-                            res.status(302).json({
-                                statusCode: "013",
-                                statusMessage: "Duplicate Reference ID!"
-                            });
+                            [Op.and]: [{phone_number: phone_number}, {user_id: user_id}, {isActive: 1}]
                         }
-                        else {
+                    }).then((result) => {
+                        if(result === null){
+                            console.log("No wallet");
+                        } else {
+                            // console.log("wallet found --> ", result);
+                            const data = {
+                                wallet_balance: parseInt(result.dataValues.balance),
+                                bonus_amount: result.dataValues.bonus,
+                                firstname: result.dataValues.firstname,
+                                lastname: result.dataValues.lastname,
+                                email: result.dataValues.email,
+                                phone_number: result.dataValues.phone_number,
+                                dob: result.dataValues.dob,
+                                referral_id: result.dataValues.referral_id,
+                                referral_code: result.dataValues.referral_code,
+                                acctype: result.dataValues.acctype,
+                                isActive: result.dataValues.isActive,
+                                isPin: result.dataValues.isPin,
+                                _id: result.dataValues.id
+                            };
+                            const current_balance = data.wallet_balance - parseInt(Math.floor(req.body.amount_charged));
+                            // console.log("this is the amount to charge", req.body.amount_charged);
+                            // console.log("this is the previous balance", data.wallet_balance);
+                            // console.log("this is the current balalnce after transaction", current_balance);
 
-                            res.status(200).json({
-                                statusCode: response.data.statusCode,
-                                statusMessage: response.data.statusMessage,
-                                beneficiaryId: response.data.beneficiaryId,
-                                transactionId: response.data.transactionId,
-                                subscriptionStatus: response.data.subscriptionStatus
-                            });
-                            const current_balance = walletBalance - parseInt(req.body.amount_charged);
                             Wallet.update(
                                 {
                                     balance: current_balance
@@ -312,47 +328,40 @@ exports.purchaseData = (req, res) => {
                                 }
                             }).then((result) => {
                                 if(result == "null"){
-                                    res.status(302).json({
-                                        statusCode: "013",
-                                        statusMessage: "Something went wrong"
-                                    });
+                                    console.log("Something went wrong, wallet update failed");
                                 } else {
-                                    // console.log("result here -->", result);
+                                    // console.log("update was successful", result); 
+                                    let description = "The Data Top Up for this number " + phone_number;
+                                    Transaction.findOrCreate({ 
+                                        where: { 
+                                            [Op.and]: [{reference_id: body.correlationId}, {user_id: user_id}, {phone_number: phone_number}]
+                                        },    
+                                        defaults: { user_id: user_id, phone_number: phone_number, reference_id: body.correlationId, fullname: "Data TopUp", amount: amount, previous_balance: data.wallet_balance, description: description, transStatus: "Successful", transtype: "AIRTIME", statusCode: "000"  }
+                                    }).then(([result, created]) => {
+                                        if((result != null) && (created == false) ){
+                                            console.log("an error occurred, could not update transaction table");
+                                        } else {
+                                            // console.log("it was a success", result);
+                                        }
+                                    }).catch((err) => {
+                                        console.log("this is the error", err);
+                                    });
                                     res.status(200).json({
-                                        statusCode: "000",
-                                        statusMessage: "Wallet Top Successuful!",
-                                    })
+                                        statusCode: response.data.statusCode,
+                                        statusMessage: response.data.statusMessage,
+                                        transactionId: response.data.transactionId,
+                                        subscriptionStatus: response.data.subscriptionStatus,
+                                        walletBalance: current_balance
+                                    }); 
                                 }
-                            }).catch((err) => {
-                                res.status(403).json({
-                                    statusCode: "016",
-                                    statusMessage: err.message
-                                });
-                            });
-                        }                          
-                    }).catch((err) => {
-                        res.status(403).json({
-                            statusCode: "016",
-                            statusMessage: err.message
-                        });
+                            })
+                        }
                     })
-                }
-        
-                console.log("success response from MTN --> " + JSON.stringify(response.data));
-                
+                    // console.log("this is the response data", response.data);
+                }               
             }).catch((error) => {
-                if(error){
-                    console.log(" Error response MTN --> " + JSON.stringify(error));
-                    res.status(303).json({
-                        statusCode: error.response.data.status ? error.response.data.status : "019",
-                        statusMessage: error.response.data.message ? error.response.data.message : "An error occured",
-                    }); 
-                } else {
-                    res.status(303).json({
-                        statusCode: "019",
-                        statusMessage: "An error occured",
-                    }); 
-                }
+                console.log("this is the error", error.response);
+                // return response.data;
             });
         }
     })
@@ -426,4 +435,6 @@ exports.testAirtime = (req, res) => {
         }
     });
 }
+
+
 
