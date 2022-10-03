@@ -70,17 +70,20 @@ router.post(
     ],
     WalletController.purchaseData);
 
-// router.post(
-//     '/getTransaction',
-//     [
-//         body('user_id')
-//             .trim()
-//             .isLength({ min: 7, max: 50 }),
-//         body('phone_number')
-//             .trim()
-//             .isLength({ min: 7, max: 11 }),
-//     ],
-//     WalletController.getTransaction);
+router.post(
+    '/pinValidation',
+    [
+        body('user_id')
+            .trim()
+            .isLength({ min: 7, max: 50 }),
+        body('phone_number')
+            .trim()
+            .isLength({ min: 7, max: 13 }),
+        body('pin')
+            .trim()
+            .isLength({ min: 4, max: 4 }),
+    ],
+    WalletController.validatePin);
 
 // router.post(
 //     '/create_transactionPin',

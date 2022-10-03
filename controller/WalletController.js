@@ -436,5 +436,48 @@ exports.testAirtime = (req, res) => {
     });
 }
 
+exports.validatePin = (req, res) => {
+    const errors = validationResult(req);
+    if(!errors.isEmpty()){
+        return res.status(422).json({
+            statusCode: "012",
+            statusMessage: "Validation failed, request body is not valid",
+            errors: errors.array()
+        });
+    }   
+
+    const phone_number = req.body.phone_number;
+    const user_id = req.body.user_id;
+    const transactionPin = req.body.pin 
+
+    let bufferObj = Buffer.from(transactionPin, "utf8");
+
+    let hashedPin = bufferObj.toString("base64");
+
+
+    Pin.findOne({
+        where: { 
+            [Op.and]: [{phone_number: phone_number}, {user_id: user_id}, {pin: hashedPin}]
+        }
+    }).then((result) => {
+        if(result == null){
+            res.status(404).json({
+                statusCode: "013",
+                statusMessage: "PIN Not Found",
+            });
+        } else {
+            res.status(200).json({
+                statusCode: "000",
+                statusMessage: "PIN Validated Successfully",
+            });
+        }
+    }).catch((err) => {
+            res.status(500).json({
+                statusCode: err.code,
+                statusMessage: err.message,
+            });
+    });
+}
+
 
 
